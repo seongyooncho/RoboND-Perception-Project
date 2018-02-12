@@ -54,7 +54,7 @@ def pcl_callback(pcl_msg):
     # Convert ROS msg to PCL data
     pcl_data = ros_to_pcl(pcl_msg)
     
-    # TODO: Statistical Outlier Filtering
+    # Statistical Outlier Filtering
     outlier_filter = pcl_data.make_statistical_outlier_filter()
     outlier_filter.set_mean_k(50)
     x = 1.0
@@ -186,6 +186,7 @@ def pr2_mover(object_list):
     # TODO: Initialize variables
 
     # TODO: Get/Read parameters
+    object_list_param = rospy.get_param('/object_list')
 
     # TODO: Parse parameters into individual variables
 
