@@ -202,6 +202,7 @@ def pr2_mover(object_list):
     # TODO: Get/Read parameters
     object_list_param = rospy.get_param('/object_list')
     dropbox_param = rospy.get_param('/dropbox')
+    test_scene_num_param = rospy.get_param('/test_scene_num')
 
     # TODO: Parse parameters into individual variables
 
@@ -215,7 +216,7 @@ def pr2_mover(object_list):
         pick_pose = Pose()
         place_pose = Pose()
 
-        test_scene_num.data = 1
+        test_scene_num.data = test_scene_num_param
 
         # TODO: Get the PointCloud for a given object and obtain it's centroid
         object_name.data = object_list_param[i]['name']
@@ -245,6 +246,7 @@ def pr2_mover(object_list):
         yaml_dict = make_yaml_dict(test_scene_num, arm_name, object_name, pick_pose, place_pose)
         dict_list.append(yaml_dict)
 
+        '''
         # Wait for 'pick_place_routine' service to come up
         rospy.wait_for_service('pick_place_routine')
 
@@ -258,10 +260,10 @@ def pr2_mover(object_list):
 
         except rospy.ServiceException, e:
             print "Service call failed: %s"%e
+        '''
 
     # TODO: Output your request parameters into output yaml file
-    print(dict_list)
-    send_to_yaml("result.yaml", dict_list)
+    send_to_yaml("output_%d.yaml"%test_scene_num.data, dict_list)
 
 
 
