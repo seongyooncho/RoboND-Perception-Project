@@ -50,17 +50,17 @@ cloud_filtered = outlier_filter.filter()
 ```
 ![filtered points](./misc_images/filtered.png)
 
-Next, to reduce computational complexes, I have applied grid downsampling. I found leaf size appropriate to 0.01. Here are the code and its resulting image.
+Next, to reduce computational complexes, I have applied grid downsampling. First, I found leaf size appropriate to 0.01, but after running scene 2, a glue behind the book is missing. So I have lowered it to 0.005 Here are the code and its resulting image.
 ```Python
 # Voxel Grid Downsampling
 vox = cloud_filtered.make_voxel_grid_filter()
-LEAF_SIZE = 0.01
+LEAF_SIZE = 0.005
 vox.set_leaf_size(LEAF_SIZE, LEAF_SIZE, LEAF_SIZE)
 cloud_downsampled = vox.filter()
 ```
 ![downsampled points](./misc_images/downsampled.png)
 
-Next, I have removed unrelated regions with pass through filter. It preserves points with range between 0.6 meters and 1.1 meters along z axis.
+Next, I have removed unrelated regions with pass through filter. It preserves points with range between 0.6 meters and 1.1 meters along z axis, between -0.45 and 0.45 along y axis, and between 0.4 and 0.9 meters along x axis.
 ```python
 # PassThrough Filter
 passthrough = cloud_downsampled.make_passthrough_filter()
@@ -70,6 +70,23 @@ axis_min = 0.6
 axis_max = 1.1
 passthrough.set_filter_limits(axis_min, axis_max)
 cloud_passthroughed = passthrough.filter()
+
+passthrough = cloud_passthroughed.make_passthrough_filter()
+filter_axis = 'y'
+passthrough.set_filter_field_name(filter_axis)
+axis_min = -0.45
+axis_max = 0.45
+passthrough.set_filter_limits(axis_min, axis_max)
+cloud_passthroughed = passthrough.filter()
+
+passthrough = cloud_passthroughed.make_passthrough_filter()
+filter_axis = 'x'
+passthrough.set_filter_field_name(filter_axis)
+axis_min = 0.4
+axis_max = 0.9
+passthrough.set_filter_limits(axis_min, axis_max)
+cloud_passthroughed = passthrough.filter()
+
 ```
 ![passthroughed points](./misc_images/passthroughed.png)
 
@@ -159,22 +176,22 @@ models = [\
    'soap',
    'glue']
 ```
-And to achieve higher accuracy, I have increased each attempts from five to twenty.
+And to achieve higher accuracy, I have increased each attempts from five to fifty.
 ```
-for i in range(20):
+for i in range(50):
   ...
 ```
 Here is the result running `train_svm.py`.
 ```
-Features in Training Set: 160
-Invalid Features in Training set: 1
-Scores: [ 0.75        0.78125     0.71875     0.84375     0.83870968]
-Accuracy: 0.79 (+/- 0.10)
-accuracy score: 0.786163522013
+Features in Training Set: 400
+Invalid Features in Training set: 2
+Scores: [ 0.8375      0.9375      0.8875      0.86075949  0.87341772]
+Accuracy: 0.88 (+/- 0.07)
+accuracy score: 0.879396984925
 ```
 ![train](./misc_images/train.png)
 
-The resulting accuracy is not that high, but it is high enough to pass the project requirements.
+The resulting accuracy is seemingly high enough to pass the project requirements.
 
 ### Pick and Place Setup
 
@@ -192,12 +209,10 @@ As you can see, all the 3 objects are correctly recognized. Success rate is (3/3
 
 Here is the result of scene number 2.
 ![train](./misc_images/output_2.png)
-You can see book is falsely recognized as sticky_notes. Others are fine though. Success rate is (4/5).
+You can see glue is falsely recognized as biscuits. Others are fine though. Success rate is (4/5).
 
 Here is the result of scene number 3.
 ![train](./misc_images/output_3.png)
-You can two false recognition. First, glue is missing because it's behind the book. Second, book is recognized as sticky note again. Success rate is (6/8).
+Glue is falsely recognized as sticky_notes again. Success rate is (7/8).
 
-It seems little bit weird that book is falsely recognized to sticky notes. Because if we look at the result matrices of 'train_svm.py', there's no chance of misrecognition between book and sticky notes. I think it could be better if I try capturing more features or test training other methods.
-
-For missing glue in scene 3, It could be solved if the recognition process is held one by one. Not everything at once. Because It can be revealed if objects in front of it is cleared.
+It seems little bit weird that glue is falsely recognized as sticky notes. Because if we look at the result matrices of 'train_svm.py', there's no chance of misrecognition between glue and sticky notes. I think there's some problem in capturing or training, but I couldn't figure what exact problem is. Since index of sticky_notes is 0, I think it might related to some problems with indexing.

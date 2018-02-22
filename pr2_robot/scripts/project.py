@@ -63,7 +63,7 @@ def pcl_callback(pcl_msg):
 
     # Voxel Grid Downsampling
     vox = cloud_filtered.make_voxel_grid_filter()
-    LEAF_SIZE = 0.01
+    LEAF_SIZE = 0.005
     vox.set_leaf_size(LEAF_SIZE, LEAF_SIZE, LEAF_SIZE)
     cloud_downsampled = vox.filter()
 
@@ -73,6 +73,22 @@ def pcl_callback(pcl_msg):
     passthrough.set_filter_field_name(filter_axis)
     axis_min = 0.6
     axis_max = 1.1
+    passthrough.set_filter_limits(axis_min, axis_max)
+    cloud_passthroughed = passthrough.filter()
+
+    passthrough = cloud_passthroughed.make_passthrough_filter()
+    filter_axis = 'y'
+    passthrough.set_filter_field_name(filter_axis)
+    axis_min = -0.45
+    axis_max = 0.45
+    passthrough.set_filter_limits(axis_min, axis_max)
+    cloud_passthroughed = passthrough.filter()
+
+    passthrough = cloud_passthroughed.make_passthrough_filter()
+    filter_axis = 'x'
+    passthrough.set_filter_field_name(filter_axis)
+    axis_min = 0.4
+    axis_max = 0.9
     passthrough.set_filter_limits(axis_min, axis_max)
     cloud_passthroughed = passthrough.filter()
 
