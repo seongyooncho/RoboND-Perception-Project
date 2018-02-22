@@ -181,6 +181,15 @@ And to achieve higher accuracy, I have increased each attempts from five to fift
 for i in range(50):
   ...
 ```
+For each model captured, I have extracted color histogram and normal histogram.
+```
+# Extract histogram features
+chists = compute_color_histograms(sample_cloud, using_hsv=True)
+normals = get_normals(sample_cloud)
+nhists = compute_normal_histograms(normals)
+feature = np.concatenate((chists, nhists))
+labeled_features.append([feature, model_name])
+```
 Here is the result running `train_svm.py`.
 ```
 Features in Training Set: 400
