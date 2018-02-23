@@ -190,6 +190,54 @@ nhists = compute_normal_histograms(normals)
 feature = np.concatenate((chists, nhists))
 labeled_features.append([feature, model_name])
 ```
+In `compute_color_histograms()`, append all the colors in points to `point_colors_list`. If using_hsv is set True, convert rgb to hsv.
+```python
+point_colors_list = []
+
+for point in pc2.read_points(cloud, skip_nans=True):
+    rgb_list = float_to_rgb(point[3])
+    if using_hsv:
+        point_colors_list.append(rgb_to_hsv(rgb_list) * 255)
+    else:
+        point_colors_list.append(rgb_list)
+```
+Then populate lists with color values
+```python
+  channel_1_vals = []
+  channel_2_vals = []
+  channel_3_vals = []
+
+  for color in point_colors_list:
+      channel_1_vals.append(color[0])
+      channel_2_vals.append(color[1])
+      channel_3_vals.append(color[2])
+```
+Next, compute histograms for each channel
+```python
+ch_1_hist = np.histogram(channel_1_vals, bins=32, range=(0, 256))
+ch_2_hist = np.histogram(channel_2_vals, bins=32, range=(0, 256))
+ch_3_hist = np.histogram(channel_3_vals, bins=32, range=(0, 256))
+```
+Finally, concatenate the results and normalize before return.
+```python
+hist_feature = np.concatenate((ch_1_hist[0], ch_2_hist[0], ch_3_hist[0])).astype(np.float64)
+normed_features = hist_feature / np.sum(hist_feature)
+```
+In `compute_normal_histograms()`, populate lists with normal values.
+```python
+norm_x_vals = []
+norm_y_vals = []
+norm_z_vals = []
+
+for norm_component in pc2.read_points(normal_cloud,
+                                      field_names = ('normal_x', 'normal_y', 'normal_z'),
+                                      skip_nans=True):
+    norm_x_vals.append(norm_component[0])
+    norm_y_vals.append(norm_component[1])
+    norm_z_vals.append(norm_component[2])
+```
+Computing histograms and normalization is same as `compute_color_histograms()`.
+
 Here is the result running `train_svm.py`.
 ```
 Features in Training Set: 400
